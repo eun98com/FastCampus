@@ -1,3 +1,5 @@
+def mainDir="Part2_Docker/Chapter02/2-jenkins-docker"
+
 pipeline {
     agent any
 
