@@ -15,24 +15,27 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build Codes by Gradle') {
+        stage('Build by Gradle') {
             steps {
                 sh """
                 cd ${mainDir}
-                ./gradlew jibDockerBuild -Djib.to.image=${docker_image_name}:${docker_image_tag}
+                ./gradlew clean build
                 """
             }
         }
-        stage('Push to Docker-hub Repository') {
-            steps {
-                    script {
-                        docker.withRegistry('', docker_hub_credentals){
-                            sh """
-                            cd ${mainDir}
-                            """
-                            def customImage = docker.image("${docker_image_name}:${docker_image_tag}")
-                        customImage.push()
-                        }
+        stages {
+        stage('Push to Docker hub){
+            steps{
+                script {
+                    docker.withRegistry('https://registry-1.docker.io/v1/', docker_hub_credentals) {
+                        def jibArgs = [
+                            'to' : [
+                                'image': "${docker_image_name}:${docker_image_tag}"
+                                'auth' : docker_hub_credentals
+                                ]
+                            ]
+                        sh "./gradlew jib --info"
+                    }
                 }
             }
         }
