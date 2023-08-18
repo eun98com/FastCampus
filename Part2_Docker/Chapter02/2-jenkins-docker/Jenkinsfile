@@ -26,22 +26,18 @@ pipeline {
         stage('Build Docker Image by Jib & Push to Docker-hub Repository') {
             steps {
                     script {
-                    def jibArgs = [
-                        'to' : [
-                            'imgae': "${docker_image_name}:${docker_image_tag}",
-                            'auth' : docker_hub_credentals
-                            ]
-                    ]
-                    sh """
-                        cd ${mainDir}
-                        ./gradlew jib -Djib.to.image=${docker_image_name}:${docker_image_tag} -Djib.console='plain'
-                    """
+                        docker.withRegistry('', docker_hub_credentals){
+                            sh """
+                            cd ${mainDir}
+                            ./gradlew jib -Djib.to.image=${docker_image_name}:${docker_image_tag} -Djib.console='plain'
+                            """
+                        }
                 }
             }
         }
         stage('Deploy to Server'){
             steps{
-                sshagent(credentials : ["deploy-nuc"]) {
+                sshagent(credentials : ["deploy-key"]) {
                     sh "ssh -o StrictHostKeyChecking=no nuc@10.32.239.42 \
                       docker run -d -p 80:8080 -t ${docker_image_name}:${docker_image_tag};'"
                 }
