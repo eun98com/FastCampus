@@ -1,14 +1,10 @@
-def mainDir = "Part2_Docker/Chapter02/2-jenkins-docker"
+def mainDir = "~/part2/FastCampus/Part2_Docker/Chapter02/2-jenkins-docker"
+def dockerHubCredentials = credentials('docker-hub-credentials')
+def dockerImageName = 'eun98com/jib-test'
+def dockerImageTag = "${env.BUILD_NUMBER}"
 
 pipeline {
-    agent any
-
-    environment {
-        docker_hub_credentials = credentials('docker_hub_credentials')
-        docker_image_name = 'eun98com/jib-test'
-        docker_image_tag = "${env.BUILD_NUMBER}"
-    }
-    
+    agent { label 'main-server' } // 서버1에서 실행되도록 라벨을 지정
 
     stages {
         stage('Pull Codes from Github') {
@@ -16,26 +12,45 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build by Gradle') {
+        stage('Build and Push to Docker Hub') {
             steps {
                 dir(mainDir) {
-                    sh "./gradlew clean build"
-                }
-            }
-        }
-        stage('Push to Docker hub') {
-            steps {
-                script {
+                    script {
+                        def jibArgs = [
+                            to: [
+                                image: "${dockerImageName}:${dockerImageTag}",
+                                auth: dockerHubCredentials
+                            ]
+                        ]
+                        sh "./gradlew clean build"
                         sh "./gradlew jib --info -Djib.console=plain -Djib.useOnlyProjectCache=false -Djib.allowInsecureRegistries=true"
                     }
                 }
             }
-        
-        stage('Deploy to Server') {
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true
+        }
+    }
+}
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Deploy to Server2') {
             steps {
-                sshagent(credentials: ["deploy-key"]) {
-                    sh "ssh -o StrictHostKeyChecking=no nuc@10.32.239.42 \
-                      'docker run -d -p 80:8080 -t ${docker_image_name}:${docker_image_tag}'"
+                script {
+                    def remote = [:]
+                    remote.name = 'Server2'
+                    remote.host = '10.32.239.42'  // 서버2의 IP 주소
+                    remote.user = 'nuc'  // SSH 사용자 이름
+                    remote.password = credentials('ssh-password-credentials-id')  // Jenkins에 등록된 SSH 비밀번호 자격 증명 ID
+
+                    sshCommand remote: remote, command: "docker pull ${dockerImageName}:${dockerImageTag}"
+                    sshCommand remote: remote, command: "docker run -d -p 80:8080 -t ${dockerImageName}:${dockerImageTag}"
                 }
             }
         }
