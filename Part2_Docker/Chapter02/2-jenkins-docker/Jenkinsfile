@@ -1,10 +1,14 @@
 def mainDir = "Part2_Docker/Chapter02/2-jenkins-docker"
-def docker_hub_credentials = credentials('docker_hub_credentials')
-def docker_image_name = 'eun98com/jib-test'
-def docker_image_tag = "${env.BUILD_NUMBER}"
 
 pipeline {
     agent any
+
+    environment {
+        docker_hub_credentials = credentials('docker_hub_credentials')
+        docker_image_name = 'eun98com/jib-test'
+        docker_image_tag = "${env.BUILD_NUMBER}"
+    }
+    
 
     stages {
         stage('Pull Codes from Github') {
@@ -22,18 +26,11 @@ pipeline {
         stage('Push to Docker hub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', docker_hub_credentials) {
-                        def jibArgs = [
-                            to: [
-                                image: "${docker_image_name}:${docker_image_tag}",
-                                auth: docker_hub_credentials
-                            ]
-                        ]
                         sh "./gradlew jib --info -Djib.console=plain -Djib.useOnlyProjectCache=false -Djib.allowInsecureRegistries=true"
                     }
                 }
             }
-        }
+        
         stage('Deploy to Server') {
             steps {
                 sshagent(credentials: ["deploy-key"]) {
