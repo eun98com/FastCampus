@@ -1,48 +1,47 @@
-def mainDir="Part2_Docker/Chapter02/2-jenkins-docker"
+def mainDir = "Part2_Docker/Chapter02/2-jenkins-docker"
 
 pipeline {
     agent any
 
-    environment{
-        docker_hub_credentals = credentials('docker-hub-credentials')
+    environment {
+        docker_hub_credentials = credentials('docker-hub-credentials')
         docker_image_name = 'eun98com/jib-test'
         docker_image_tag = "${env.BUILD_NUMBER}"
     }
 
     stages {
-        stage('Pull Codes from Github'){
-            steps{
+        stage('Pull Codes from Github') {
+            steps {
                 checkout scm
             }
         }
         stage('Build by Gradle') {
             steps {
-                sh """
-                cd ${mainDir}
-                ./gradlew clean build
-                """
+                dir(mainDir) {
+                    sh "./gradlew clean build"
+                }
             }
         }
-        stage('Push to Docker hub) {
-            steps{
+        stage('Push to Docker hub') {
+            steps {
                 script {
-                    docker.withRegistry('https://registry-1.docker.io/v1/', docker_hub_credentals) {
+                    docker.withRegistry('https://index.docker.io/v1/', docker_hub_credentials) {
                         def jibArgs = [
-                            'to' : [
-                                'image': "${docker_image_name}:${docker_image_tag}"
-                                'auth' : docker_hub_credentals
-                                ]
+                            to: [
+                                image: "${docker_image_name}:${docker_image_tag}",
+                                auth: docker_hub_credentials
                             ]
-                        sh "./gradlew jib --info"
+                        ]
+                        sh "./gradlew jib --info -Djib.console=plain -Djib.useOnlyProjectCache=false -Djib.allowInsecureRegistries=true"
                     }
                 }
             }
         }
-        stage('Deploy to Server'){
-            steps{
-                sshagent(credentials : ["deploy-key"]) {
+        stage('Deploy to Server') {
+            steps {
+                sshagent(credentials: ["deploy-key"]) {
                     sh "ssh -o StrictHostKeyChecking=no nuc@10.32.239.42 \
-                      docker run -d -p 80:8080 -t ${docker_image_name}:${docker_image_tag};'"
+                      'docker run -d -p 80:8080 -t ${docker_image_name}:${docker_image_tag}'"
                 }
             }
         }
