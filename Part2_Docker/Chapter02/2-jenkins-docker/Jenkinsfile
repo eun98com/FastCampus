@@ -42,7 +42,7 @@ pipeline {
         stage('Deploy to AWS EC2 VM'){
             steps{
                 sshagent(credentials : ["deploy-nuc"]) {
-                    sh "ssh -o StrictHostKeyChecking=no nuc@${10.32.239.42} \
+                    sh "ssh -o StrictHostKeyChecking=no nuc@10.32.239.42 \
                       docker run -d -p 80:8080 -t ${ecrUrl}/${repository}:${currentBuild.number};'"
                 }
             }
