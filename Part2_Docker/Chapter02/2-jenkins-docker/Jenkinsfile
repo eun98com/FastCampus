@@ -40,7 +40,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Deploy on Server 2') {
+        stage('Deploy on Server 2 via SSH') {
             steps {
                 script {
                     def remoteHost = '10.32.239.42'
@@ -54,7 +54,7 @@ pipeline {
                         port: remotePort
                     ], command: """
                     docker pull ${dockerImageName}:${dockerImageTag}
-                    docker run -d -p 80:8080 -t --name:jib-test ${dockerImageName}:${dockerImageTag} 
+                    docker run -d -p 80:8080 -t ${dockerImageName}:${dockerImageTag}
                     """
                 }
             }
