@@ -1,4 +1,4 @@
-def mainDir = "~/part2/FastCampus/Part2_Docker/Chapter02/2-jenkins-docker"
+def mainDir = "~/part2/FastCampus/Part2_Docker/Chapter02/2-jenkins-docker/"
 def dockerHubCredentials = credentials('docker-hub-credentials')
 def dockerImageName = 'eun98com/jib-test'
 def dockerImageTag = "${env.BUILD_NUMBER}"
