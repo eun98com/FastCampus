@@ -28,7 +28,7 @@ pipeline {
                     script {
                     def jibArgs = [
                         'to' : [
-                            'imgae': "${docker_imagename}:${docker_image_tag}",
+                            'imgae': "${docker_image_name}:${docker_image_tag}",
                             'auth' : docker_hub_credentals
                             ]
                     ]
