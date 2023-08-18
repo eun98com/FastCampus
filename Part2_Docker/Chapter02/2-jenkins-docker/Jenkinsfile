@@ -1,10 +1,10 @@
-def mainDir = "~/part2/FastCampus/Part2_Docker/Chapter02/2-jenkins-docker/"
+def mainDir = "~/part2/FastCampus/Part2_Docker/Chapter02/2-jenkins-docker"
 def dockerHubCredentials = credentials('docker-hub-credentials')
 def dockerImageName = 'eun98com/jib-test'
 def dockerImageTag = "${env.BUILD_NUMBER}"
 
 pipeline {
-    agent ('main-server') // 서버1에서 실행되도록 라벨을 지정
+    agent any
 
     stages {
         stage('Pull Codes from Github') {
@@ -40,17 +40,22 @@ pipeline {
     agent any
 
     stages {
-        stage('Deploy to Server2') {
+        stage('Deploy on Server 2') {
             steps {
                 script {
-                    def remote = [:]
-                    remote.name = 'Server2'
-                    remote.host = '10.32.239.42'  // 서버2의 IP 주소
-                    remote.user = 'nuc'  // SSH 사용자 이름
-                    remote.password = credentials('ssh-password-credentials-id')  // Jenkins에 등록된 SSH 비밀번호 자격 증명 ID
+                    def remoteHost = '10.32.239.42'
+                    def remoteUser = 'nuc'
+                    def remotePort = 22
+                    //def remoteDir = '/path/to/remote/directory'
 
-                    sshCommand remote: remote, command: "docker pull ${dockerImageName}:${dockerImageTag}"
-                    sshCommand remote: remote, command: "docker run -d -p 80:8080 -t ${dockerImageName}:${dockerImageTag}"
+                    sshCommand remote: [
+                        host: remoteHost,
+                        user: remoteUser,
+                        port: remotePort
+                    ], command: """
+                    docker pull ${dockerImageName}:${dockerImageTag}
+                    docker run -d -p 80:8080 -t --name:jib-test ${dockerImageName}:${dockerImageTag} 
+                    """
                 }
             }
         }
