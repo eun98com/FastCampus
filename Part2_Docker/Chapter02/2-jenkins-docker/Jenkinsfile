@@ -4,7 +4,7 @@ def dockerImageName = 'eun98com/jib-test'
 def dockerImageTag = "${env.BUILD_NUMBER}"
 
 pipeline {
-    agent { label 'main-server' } // 서버1에서 실행되도록 라벨을 지정
+    agent {'main-server'} // 서버1에서 실행되도록 라벨을 지정
 
     stages {
         stage('Pull Codes from Github') {
