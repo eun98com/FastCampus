@@ -3,7 +3,7 @@ def mainDir="Part2_Docker/Chapter02/2-jenkins-docker"
 pipeline {
     agent any
 
-    enviroment{
+    environment{
         docker_hub_credentals = credentials('docker-hub-credentials')
         docker_image_name = 'eun98com/jib-test'
         docker_image_tag = "${env.BUILD_NUMBER}"
