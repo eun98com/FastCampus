@@ -4,10 +4,10 @@ pipeline {
     agent any
 
     environment {
-        docker_hub_credentials = credentials('docker_hub_credentials')
-        docker_image_name = 'eun98com/jib-test'
-        docker_image_tag = "${env.BUILD_NUMBER}"
-    }
+    docker_hub_credentials = credentials('docker_hub_credentials')
+    docker_image_name = 'eun98com/jib-test'
+    docker_image_tag = "${env.BUILD_NUMBER}"
+}
 
     stages {
         stage('Pull Codes from Github') {
