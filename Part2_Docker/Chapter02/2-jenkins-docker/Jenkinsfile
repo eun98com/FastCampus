@@ -19,18 +19,19 @@ pipeline {
             steps {
                 sh """
                 cd ${mainDir}
-                ./gradlew clean build
+                ./gradlew jibDockerBuild -Djib.to.image=${docker_image_name}:${docker_image_tag}
                 """
             }
         }
-        stage('Build Docker Image by Jib & Push to Docker-hub Repository') {
+        stage('Push to Docker-hub Repository') {
             steps {
                     script {
                         docker.withRegistry('', docker_hub_credentals){
                             sh """
                             cd ${mainDir}
-                            ./gradlew jib -Djib.to.image=${docker_image_name}:${docker_image_tag} -Djib.console='plain'
                             """
+                            def customImage = docker.image("${docker_image_name}:${docker_image_tag}")
+                        customImage.push()
                         }
                 }
             }
