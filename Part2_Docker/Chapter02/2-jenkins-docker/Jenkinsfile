@@ -16,7 +16,7 @@ pipeline {
             steps {
                 dir(mainDir) {
                     script {
-                        sh "./gradlew cleanBuildCache"
+                        sh "./gradlew clean"
                         sh "./gradlew clean build"
                         sh "./gradlew jib --info -Djib.console=plain -Djib.useOnlyProjectCache=false -Djib.allowInsecureRegistries=true"
                     }
