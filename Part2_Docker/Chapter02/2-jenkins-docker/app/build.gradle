@@ -33,6 +33,9 @@ jib {
     from {
         image = 'adoptopenjdk/openjdk11:alpine-jre'
     }
+    to {
+        image = 'eun98com/jib-test:0.1'
+    }
     
     container {
 
