@@ -2,6 +2,8 @@ def mainDir = "Part2_Docker/Chapter02/2-jenkins-docker"
 def dockerHubCredentials = credentials('docker-hub-credentials')
 def dockerImageName = "eun98com/jib-test"
 def dockerImageTag = "${env.BUILD_NUMBER}"
+def username="eun98com"
+def userpasswd="~a961002k"
 
 pipeline {
     agent any
@@ -18,7 +20,7 @@ pipeline {
                     script {
                         sh "./gradlew clean"
                         sh "./gradlew clean build"
-                        sh "'./gradlew jib -Djib.allowInsecureRegistries=true -Djib.to.auth.username=$eun98com -Djib.to.auth.password=\~a961002k'"
+                        sh "'./gradlew jib -Djib.allowInsecureRegistries=true -Djib.to.auth.username=${username} -Djib.to.auth.password=${userpasswd}'"
                     }
                 }
             }
