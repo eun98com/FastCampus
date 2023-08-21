@@ -33,6 +33,11 @@ jib {
     from {
         image = 'adoptopenjdk/openjdk11:alpine-jre'
     }
+    to {
+        image = 'eun98com/jib-test'
+        tags = [1.0]
+    }
+    
     container {
 
         mainClass = 'com.test.StartApplication'
