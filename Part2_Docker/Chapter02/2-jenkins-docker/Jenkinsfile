@@ -6,11 +6,6 @@ def dockerImageTag = "${env.BUILD_NUMBER}"
 pipeline {
     agent any
 
-    enviroment {
-        imagename = dockerImageName
-        registryCredential = 'docker-hub-credentials'
-        dockerImage = ''
-
     stages {
         stage('Pull Codes from Github') {
             steps {
@@ -52,8 +47,8 @@ pipeline {
                         user: remoteUser,
                         port: remotePort
                     ], command: """
-                    docker pull ${dockerImageName}:${dockerImageTag}
-                    docker run -d -p 80:8080 -t ${dockerImageName}:${dockerImageTag}
+                    docker pull eun98com/jib-test:0.1
+                    docker run -d -p 80:8080 -t eun98com/jib-test:0.1
                     """
                 }
             }
