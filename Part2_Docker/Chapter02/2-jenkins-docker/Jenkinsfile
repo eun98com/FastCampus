@@ -1,10 +1,15 @@
 def mainDir = "Part2_Docker/Chapter02/2-jenkins-docker"
 def dockerHubCredentials = credentials('docker-hub-credentials')
-def dockerImageName = 'eun98com/jib-test'
+def dockerImageName = "eun98com/jib-test"
 def dockerImageTag = "${env.BUILD_NUMBER}"
 
 pipeline {
     agent any
+
+    enviroment {
+        imagename = dockerImageName
+        registryCredential = 'docker-hub-credentials'
+        dockerImage = ''
 
     stages {
         stage('Pull Codes from Github') {
@@ -16,12 +21,6 @@ pipeline {
             steps {
                 dir(mainDir) {
                     script {
-                        def jibArgs = [
-                            to: [
-                                image: "${dockerImageName}:${dockerImageTag}",
-                                auth: dockerHubCredentials
-                            ]
-                        ]
                         sh "./gradlew clean build"
                         sh "./gradlew jib --info -Djib.console=plain -Djib.useOnlyProjectCache=false -Djib.allowInsecureRegistries=true"
                     }
