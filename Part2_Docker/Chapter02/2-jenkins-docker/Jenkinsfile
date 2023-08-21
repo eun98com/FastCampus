@@ -25,34 +25,36 @@ pipeline {
                 }
             }
         }
-    }
-    post {
-        always {
-            archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true
-        }
-    }
-}
-
-pipeline {
-    agent any
-
-    stages {
-        stage('Deploy on Server 2 via SSH') {
+        stage('Build Codes by Gradle') {
             steps {
-                script {
-                    def remoteHost = '10.32.239.42'
-                    def remoteUser = 'nuc'
-                    def remotePort = 22
-                    //def remoteDir = '/path/to/remote/directory'
-
-                    sshCommand remote: [
-                        host: remoteHost,
-                        user: remoteUser,
-                        port: remotePort
-                    ], command: """
-                    docker pull eun98com/jib-test:0.1
-                    docker run -d -p 80:8080 -t eun98com/jib-test:0.1
-                    """
+                dir(mainDir) {
+                    script {
+                        sh "./gradlew clean"
+                        sh "./gradlew clean build"
+                        sh "'./gradlew jib -Djib.allowInsecureRegistries=true -Djib.to.auth.username=${username} -Djib.to.auth.password=${userpasswd}'"
+                    }
+                }
+            }
+        }
+        stage('Build Docker Image by Jib & Push to Docker Hub') {
+            steps {
+                dir(mainDir) {
+                    script {
+                        sh "./gradlew clean"
+                        sh "./gradlew clean build"
+                        sh "'./gradlew jib -Djib.allowInsecureRegistries=true -Djib.to.auth.username=${username} -Djib.to.auth.password=${userpasswd}'"
+                    }
+                }
+            }
+        }
+        stage('Deploy server to Docker Image Push & Run') {
+            steps {
+                dir(mainDir) {
+                    script {
+                        sh "./gradlew clean"
+                        sh "./gradlew clean build"
+                        sh "'./gradlew jib -Djib.allowInsecureRegistries=true -Djib.to.auth.username=${username} -Djib.to.auth.password=${userpasswd}'"
+                    }
                 }
             }
         }
